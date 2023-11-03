@@ -146,5 +146,8 @@ compile_commands.json
 .history
 .ionide
 
-# objc-boilerplate
+# MicroHTTPKit
 build/
+
+# clangd
+.cache/
