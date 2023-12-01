@@ -38,6 +38,7 @@
 		_URL = [URL copy];
 		_headers = [headers copy];
 		_HTTPBody = [HTTPBody copy];
+		_userInfo = @{};
 	}
 	return self;
 }

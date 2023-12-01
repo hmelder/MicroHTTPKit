@@ -9,7 +9,7 @@
 @implementation HKHTTPRequest (Private)
 
 - (void)appendBytesToHTTPBody:(const void *)bytes length:(NSUInteger)length {
-	NSAssert([_HTTPBody isKindOfClass:[NSMutableData class]], @"HTTPBody is not mutable");
+	NSAssert([_HTTPBody isKindOfClass:[NSMutableData class]], @"HTTPBody is not mutable", nil);
 
 	NSMutableData *data = (NSMutableData *) _HTTPBody;
 	[data appendBytes:bytes length:length];

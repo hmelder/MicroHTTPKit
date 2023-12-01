@@ -49,7 +49,8 @@ static enum MHD_Result _keyValueTrampoline(void *blockPointer, enum MHD_ValueKin
 /* Wrapper around MHD_get_connection_values that calls a HKKeyValueBlock for each key-value pair.
  * Returns MHD_YES if all calls to the HKKeyValueBlock returned YES, otherwise MHD_NO.
  */
-int HKConnectionValuesFromBlock(struct MHD_Connection *connection, enum MHD_ValueKind kind,
+int HKConnectionValuesFromBlock(struct MHD_Connection *connection,
+								__attribute__((unused)) enum MHD_ValueKind kind,
 								HKKeyValueBlock block) {
 	return MHD_get_connection_values(connection, MHD_HEADER_KIND, _keyValueTrampoline,
 									 (__bridge void *) (block));
@@ -60,7 +61,8 @@ int HKConnectionValuesFromBlock(struct MHD_Connection *connection, enum MHD_Valu
  * request.
  */
 static enum MHD_Result accessHandler(void *cls, struct MHD_Connection *connection, const char *url,
-									 const char *method, const char *version,
+									 const char *method,
+									 __attribute__((unused)) const char *version,
 									 const char *upload_data, size_t *upload_data_size,
 									 void **con_cls) {
 	@autoreleasepool {
@@ -84,16 +86,18 @@ static enum MHD_Result accessHandler(void *cls, struct MHD_Connection *connectio
 			queryParameters = [NSMutableDictionary dictionary];
 
 			// Retrieve the headers and query parameters from the connection
-			HKConnectionValuesFromBlock(connection, MHD_HEADER_KIND,
-										^(enum MHD_ValueKind kind, NSString *key, NSString *value) {
-											[headers setObject:value forKey:key];
-											return YES;
-										});
-			HKConnectionValuesFromBlock(connection, MHD_GET_ARGUMENT_KIND,
-										^(enum MHD_ValueKind kind, NSString *key, NSString *value) {
-											[queryParameters setObject:value forKey:key];
-											return YES;
-										});
+			HKConnectionValuesFromBlock(
+				connection, MHD_HEADER_KIND,
+				^(__attribute__((unused)) enum MHD_ValueKind kind, NSString *key, NSString *value) {
+					[headers setObject:value forKey:key];
+					return YES;
+				});
+			HKConnectionValuesFromBlock(
+				connection, MHD_GET_ARGUMENT_KIND,
+				^(__attribute__((unused)) enum MHD_ValueKind kind, NSString *key, NSString *value) {
+					[queryParameters setObject:value forKey:key];
+					return YES;
+				});
 
 			request = [[HKHTTPRequest alloc] initWithMethod:methodString
 														URL:[NSURL URLWithString:urlString]
@@ -135,8 +139,10 @@ static enum MHD_Result accessHandler(void *cls, struct MHD_Connection *connectio
 }
 
 // A MHD_RequestCompletedCallback to release the request object when the request is completed.
-static void requestCompletedCallback(void *cls, struct MHD_Connection *connection, void **con_cls,
-									 enum MHD_RequestTerminationCode toe) {
+static void requestCompletedCallback(__attribute__((unused)) void *cls,
+									 __attribute__((unused)) struct MHD_Connection *connection,
+									 void **con_cls,
+									 __attribute__((unused)) enum MHD_RequestTerminationCode toe) {
 	@autoreleasepool {
 		if (*con_cls != NULL) {
 			// Cast the result to void to indicate to the compiler that we are intentionally
@@ -159,10 +165,11 @@ static void requestCompletedCallback(void *cls, struct MHD_Connection *connectio
 	self = [super init];
 	if (self) {
 		_port = port;
-		_router = [HKRouter routerWithRoutes:@[]
-							 notFoundHandler:^HKHTTPResponse *(HKHTTPRequest *request) {
-								 return [HKHTTPResponse responseWithStatus:404];
-							 }];
+		_router = [HKRouter
+			routerWithRoutes:@[]
+			 notFoundHandler:^HKHTTPResponse *(__attribute__((unused)) HKHTTPRequest *request) {
+				 return [HKHTTPResponse responseWithStatus:404];
+			 }];
 	}
 	return self;
 }
@@ -202,13 +209,23 @@ static void requestCompletedCallback(void *cls, struct MHD_Connection *connectio
 	struct MHD_Response *mhd_response;
 	int returnCode;
 
-	HKHTTPResponse *response;
-	NSData *responseData;
+	HKHTTPResponse *response = nil;
+	HKHandlerBlock middlewareHandler = nil;
+	NSData *responseData = nil;
 
-	HKHandlerBlock handler = [[self router] handlerForRequest:request];
+	middlewareHandler = [[self router] middleware];
+	// Check if a middleware handler is registered
+	if (middlewareHandler) {
+		response = middlewareHandler(request);
+	}
 
-	// Execute the installed handler block
-	response = handler(request);
+	// If middleware set a response, use it. Otherwise, use the response from the router.
+	if (response == nil) {
+		HKHandlerBlock handler = [[self router] handlerForRequest:request];
+		// Execute the installed handler block
+		response = handler(request);
+	}
+
 	responseData = [response data];
 
 	// If we have response data, create a response from it. Otherwise, create an empty response.
