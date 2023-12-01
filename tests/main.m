@@ -1,11 +1,11 @@
-#include "MicroHTTPKit/HKHTTPConstants.h"
 #import <MicroHTTPKit/MicroHTTPKit.h>
 
-int main(int argc, const char *argv[]) {
+int main(void) {
 	@autoreleasepool {
 		HKHTTPServer *server;
 		HKRoute *route;
 		HKRoute *postRoute;
+		HKHandlerBlock simpleMiddleware;
 		NSError *error;
 
 		server = [[HKHTTPServer alloc] initWithPort:8080];
@@ -13,6 +13,7 @@ int main(int argc, const char *argv[]) {
 			routeWithPath:@"/"
 				   method:HKHTTPMethodGET
 				  handler:^(HKHTTPRequest *request) {
+					  NSLog(@"UserInfo: %@", [request userInfo]);
 					  return [HKHTTPResponse
 						  responseWithData:[@"Hello, World!" dataUsingEncoding:NSUTF8StringEncoding]
 									status:200];
@@ -34,8 +35,15 @@ int main(int argc, const char *argv[]) {
 									status:200];
 				  }];
 
+		simpleMiddleware = ^(HKHTTPRequest *request) {
+			[request setUserInfo:@{@"foo" : @"bar"}];
+			NSLog(@"Middleware called");
+			return nil;
+		};
+
 		[[server router] registerRoute:route];
 		[[server router] registerRoute:postRoute];
+		[[server router] setMiddleware:simpleMiddleware];
 
 		if (![server startWithError:&error]) {
 			NSLog(@"Failed to start server: %@", error);
