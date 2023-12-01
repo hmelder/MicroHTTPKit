@@ -10,9 +10,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface HKHTTPResponse : NSObject
 
-@property (nonatomic, strong, nullable) NSData *data;
-@property (nonatomic, assign) NSUInteger status;
-@property (nonatomic, strong) NSDictionary<NSString *, NSString *> *headers;
+@property (strong, nullable) NSData *data;
+@property (assign) NSUInteger status;
+@property (strong) NSDictionary<NSString *, NSString *> *headers;
 
 + (instancetype)responseWithStatus:(NSUInteger)status;
 + (instancetype)responseWithData:(NSData *)data status:(NSUInteger)status;

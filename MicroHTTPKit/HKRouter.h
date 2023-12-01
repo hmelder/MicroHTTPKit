@@ -36,6 +36,15 @@ extern NSString *const HKResponseStatusKey;
 @interface HKRouter : NSObject
 
 @property (copy) HKHandlerBlock notFoundHandler;
+
+/**
+ * A middleware block that is called before the handler block.
+ * The middleware block can be used to modify the userInfo dictionary in the request before it is
+ * handled.
+ *
+ * If the middleware block returns a HKHTTPResponse object, this response is used instead of
+ * calling the handler block.
+ */
 @property (copy, nullable) HKHandlerBlock middleware;
 
 - (HKHandlerBlock)handlerForRequest:(HKHTTPRequest *)request;

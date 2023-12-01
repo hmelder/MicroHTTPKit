@@ -13,10 +13,19 @@ NS_ASSUME_NONNULL_BEGIN
 	NSData *_HTTPBody;
 }
 
-@property (nonatomic, readonly, copy) NSString *method;
-@property (nonatomic, readonly, copy) NSURL *URL;
-@property (nonatomic, readonly, copy) NSDictionary<NSString *, NSString *> *headers;
-@property (nonatomic, readonly, copy) NSDictionary<NSString *, NSString *> *queryParameters;
+@property (readonly, copy) NSString *method;
+@property (readonly, copy) NSURL *URL;
+@property (readonly, copy) NSDictionary<NSString *, NSString *> *headers;
+@property (readonly, copy) NSDictionary<NSString *, NSString *> *queryParameters;
+
+/**
+ * @brief The user info dictionary for the request.
+ *
+ * This property is initialized to an empty dictionary, which you can then use to store
+ * app-specific information. For example, you might use it during the processing of the
+ * request to store processing-related data in the middleware.
+ */
+@property (copy) NSDictionary *userInfo;
 
 - (instancetype)initWithMethod:(NSString *)method
 						   URL:(NSURL *)URL
