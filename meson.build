@@ -1,5 +1,7 @@
 project('MicroHTTPKit', 'objc', version : '0.2.0', default_options : ['warning_level=3'])
 
+pkg = import('pkgconfig')
+
 # Ensure clang is used for Objective-C
 objc_compiler = meson.get_compiler('objc')
 if objc_compiler.get_id() != 'clang'
@@ -63,6 +65,15 @@ source = [
     'src/HKHTTPConstants.m',
 ]
 
+headers = [
+    'MicroHTTPKit/MicroHTTPKit.h',
+    'MicroHTTPKit/HKHTTPServer.h',
+    'MicroHTTPKit/HKRouter.h',
+    'MicroHTTPKit/HKHTTPRequest.h',
+    'MicroHTTPKit/HKHTTPResponse.h',
+    'MicroHTTPKit/HKHTTPConstants.h',
+]
+
 include_dirs = include_directories(
     'MicroHTTPKit',
 )
@@ -75,5 +86,16 @@ microhttpkit_lib = library(
   include_directories: include_dirs,
   install: true,
 )
+
+install_headers(
+  headers,
+  install_dir: join_paths(get_option('prefix'), get_option('includedir'), 'MicroHTTPKit'),
+)
+
+pkg.generate(libraries : microhttpkit_lib,
+             version : meson.project_version(),
+             name : 'libmicrohttpkit',
+             filebase : 'microhttpkit',
+             description : 'A simple HTTP server written in Objective-C.')
 
 subdir('tests')
