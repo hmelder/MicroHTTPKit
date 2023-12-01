@@ -34,7 +34,7 @@ static enum MHD_Result _keyValueTrampoline(void *blockPointer, enum MHD_ValueKin
 		HKKeyValueBlock block;
 
 		keyString = [NSString stringWithUTF8String:key];
-		valueString = [NSString stringWithUTF8String:value];
+		valueString = value ? [NSString stringWithUTF8String:value] : @"";
 		block = (__bridge HKKeyValueBlock) blockPointer;
 
 		// Call the HKKeyValueBlock
@@ -49,10 +49,9 @@ static enum MHD_Result _keyValueTrampoline(void *blockPointer, enum MHD_ValueKin
 /* Wrapper around MHD_get_connection_values that calls a HKKeyValueBlock for each key-value pair.
  * Returns MHD_YES if all calls to the HKKeyValueBlock returned YES, otherwise MHD_NO.
  */
-int HKConnectionValuesFromBlock(struct MHD_Connection *connection,
-								__attribute__((unused)) enum MHD_ValueKind kind,
+int HKConnectionValuesFromBlock(struct MHD_Connection *connection, enum MHD_ValueKind kind,
 								HKKeyValueBlock block) {
-	return MHD_get_connection_values(connection, MHD_HEADER_KIND, _keyValueTrampoline,
+	return MHD_get_connection_values(connection, kind, _keyValueTrampoline,
 									 (__bridge void *) (block));
 }
 
