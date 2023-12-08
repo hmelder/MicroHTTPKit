@@ -49,12 +49,6 @@ add_project_arguments(objc_flags, language: 'objc')
 libmicrohttpd_dep = dependency('libmicrohttpd', required: true)
 dependencies_to_link += libmicrohttpd_dep
 
-# Add libdispatch dependency when on Linux
-if host_machine.system() != 'darwin'
-  libdispatch_dep = dependency('libdispatch', required: true)
-  dependencies_to_link += libdispatch_dep
-endif
-
 source = [
     # Objc files
     'src/HKHTTPServer.m',
