@@ -211,6 +211,7 @@ static void requestCompletedCallback(__attribute__((unused)) void *cls,
 	HKHTTPResponse *response = nil;
 	HKHandlerBlock middlewareHandler = nil;
 	NSData *responseData = nil;
+	NSDictionary<NSString *, NSString *> *responseHeaders = nil;
 
 	middlewareHandler = [[self router] middleware];
 	// Check if a middleware handler is registered
@@ -226,6 +227,7 @@ static void requestCompletedCallback(__attribute__((unused)) void *cls,
 	}
 
 	responseData = [response data];
+	responseHeaders = [response headers];
 
 	// If we have response data, create a response from it. Otherwise, create an empty response.
 	if (responseData) {
@@ -238,6 +240,13 @@ static void requestCompletedCallback(__attribute__((unused)) void *cls,
 		}
 	} else {
 		mhd_response = MHD_create_response_from_buffer(0, "", MHD_RESPMEM_PERSISTENT);
+	}
+
+	if (responseHeaders) {
+		for (NSString *key in [responseHeaders allKeys]) {
+			NSString *value = [responseHeaders objectForKey:key];
+			MHD_add_response_header(mhd_response, [key UTF8String], [value UTF8String]);
+		}
 	}
 
 	returnCode = MHD_queue_response(conn, (unsigned int) [response status], mhd_response);
