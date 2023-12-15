@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include "HKRouter.h"
 #import <MicroHTTPKit/HKHTTPRequest.h>
 #import <MicroHTTPKit/HKHTTPServer.h>
 
@@ -224,6 +225,14 @@ static void requestCompletedCallback(__attribute__((unused)) void *cls,
 		HKHandlerBlock handler = [[self router] handlerForRequest:request];
 		// Execute the installed handler block
 		response = handler(request);
+	}
+
+	if ([response checkIfEndpointExists]) {
+		if (![[self router] respondsToPath:[URL path]]) {
+			HKHandlerBlock handler = [[self router] notFoundHandler];
+
+			response = handler(request);
+		}
 	}
 
 	responseData = [response data];

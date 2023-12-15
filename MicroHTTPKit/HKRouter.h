@@ -49,6 +49,8 @@ extern NSString *const HKResponseStatusKey;
 
 - (HKHandlerBlock)handlerForRequest:(HKHTTPRequest *)request;
 
+- (BOOL)respondsToPath:(NSString *)path;
+
 + (instancetype)routerWithRoutes:(NSArray<HKRoute *> *)routes
 				 notFoundHandler:(HKHandlerBlock)notFoundHandler;
 

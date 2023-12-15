@@ -14,6 +14,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (assign) NSUInteger status;
 @property (strong) NSDictionary<NSString *, NSString *> *headers;
 
+/**
+	@brief If set to YES, the server will check if the endpoint exists *after* the middleware block
+
+	This property only has an effect when set in the middleware block.
+*/
+@property BOOL checkIfEndpointExists;
+
 + (instancetype)responseWithStatus:(NSUInteger)status;
 + (instancetype)responseWithData:(NSData *)data status:(NSUInteger)status;
 

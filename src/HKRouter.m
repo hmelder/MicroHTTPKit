@@ -69,6 +69,16 @@
 	return [self notFoundHandler];
 }
 
+- (BOOL)respondsToPath:(NSString *)path {
+	for (HKRoute *route in [self routes]) {
+		if ([path isEqualToString:[route path]]) {
+			return YES;
+		}
+	}
+
+	return NO;
+}
+
 - (void)registerRoute:(HKRoute *)route {
 	[_routes addObject:route];
 }
